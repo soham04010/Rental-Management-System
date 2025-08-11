@@ -51,13 +51,13 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: #6B21A8;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: #FFD700;
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -76,6 +76,17 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --color-start: #4C1D95; /* deep purple */
+  --color-mid: #6B21A8;   /* medium purple */
+  --color-end: #FFD700;
+}
+.btn-gradient {
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  color: white;
+}
+body {
+  background: linear-gradient(to bottom right, var(--color-start), var(--color-mid), var(--color-end));
+  min-height: 100vh;
 }
 
 .dark {
