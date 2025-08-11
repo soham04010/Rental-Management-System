@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Menu, X, User, LogOut, Settings, BookOpen } from "lucide-react";
+import { Sparkles, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -34,62 +33,70 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    setUser(null);
+    localStorage.removeItem("token");
     router.push("/");
+    setUser(null);
   };
 
-  if (loading) {
-    return (
-      <nav className="w-full fixed top-0 z-50 glass-effect border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2 animate-pulse">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg"></div>
-            <div className="w-32 h-6 bg-muted rounded"></div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  if (loading) return null;
 
   return (
     <nav 
-      className={`w-full fixed top-0 z-50 transition-all duration-500 ${
+      className={`w-full fixed top-0 z-50 transition-smooth animate-fade-in ${
         isScrolled 
-          ? 'glass-effect border-b border-white/20 shadow-lg' 
-          : 'bg-transparent border-b border-transparent'
+          ? 'glass-effect shadow-elegant' 
+          : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link 
-          href="/" 
-          className="flex items-center space-x-2 group transition-all duration-300 hover:scale-105"
-        >
-          <div className="p-2 bg-gradient-primary rounded-xl shadow-glow group-hover:shadow-xl transition-all duration-300">
-            <Sparkles className="w-6 h-6 text-white" />
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo with modern styling */}
+        <Link href="/" className="flex items-center space-x-3 group">
+          <div className="p-2.5 bg-gradient-to-r from-primary to-accent rounded-xl shadow-lg transition-smooth group-hover:scale-110 group-hover:shadow-glow">
+            <Sparkles className="w-6 h-6 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold gradient-text">
-            Rental<span className="text-foreground">Hub</span>
+          <span className="text-2xl font-bold">
+            <span className="gradient-text">Rental</span>
+            <span className="text-foreground">Hub</span>
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-4">
+        {/* Navigation Links with smooth effects */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="/products" className="nav-link text-foreground font-medium">
+            Products
+          </Link>
+          <Link href="/bookings" className="nav-link text-foreground font-medium">
+            Bookings
+          </Link>
+          {user?.role === "customer" && (
+            <Link href="/customer-dashboard" className="nav-link text-foreground font-medium">
+              <LayoutDashboard className="w-4 h-4 inline mr-2" />
+              Dashboard
+            </Link>
+          )}
+          {user?.role === "admin" && (
+            <Link href="./dashboard/admin-dashboard" className="nav-link text-foreground font-medium">
+              <Settings className="w-4 h-4 inline mr-2" />
+              Admin Panel
+            </Link>
+          )}
+        </div>
+
+        {/* Authentication Section */}
+        <div className="flex items-center gap-3">
           {!user ? (
             <>
               <Button 
                 variant="ghost" 
-                className="btn-glass"
                 onClick={() => router.push("/login")}
+                className="text-foreground hover:bg-white/10 transition-smooth"
               >
                 Login
               </Button>
@@ -103,146 +110,52 @@ export default function Navbar() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="btn-glass p-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-gradient-primary text-white">
-                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-3 p-2 hover:bg-white/10 transition-smooth rounded-xl"
+                >
+                  <Avatar className="w-9 h-9 avatar-glow">
+                    <AvatarImage src={user?.avatar || "/default-avatar.png"} />
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold">
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="ml-2 hidden sm:inline">{user.name}</span>
+                  <span className="ml-2 hidden sm:inline text-foreground font-medium">
+                    {user.name}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 glass-effect border-white/20">
-                <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+              <DropdownMenuContent 
+                className="w-56 glass-effect border-border/50 animate-slide-down"
+                align="end"
+              >
+                <DropdownMenuItem 
+                  onClick={() => router.push("/profile")}
+                  className="flex items-center gap-3 p-3 hover:bg-white/10 transition-smooth cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="font-medium">Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/bookings")} className="cursor-pointer">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  My Bookings
+                <DropdownMenuItem 
+                  onClick={() => router.push("/settings")}
+                  className="flex items-center gap-3 p-3 hover:bg-white/10 transition-smooth cursor-pointer"
+                >
+                  <Settings className="w-4 h-4 text-primary" />
+                  <span className="font-medium">Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                <div className="h-px bg-border/50 my-1" />
+                <DropdownMenuItem 
+                  onClick={handleLogout} 
+                  className="flex items-center gap-3 p-3 text-destructive hover:bg-destructive/10 transition-smooth cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="font-medium">Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="btn-glass"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
-          </Button>
-        </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full glass-effect border-b border-white/20 animate-slide-up">
-          <div className="px-4 py-6 space-y-4">
-            {!user ? (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="w-full btn-glass justify-start"
-                  onClick={() => {
-                    router.push("/login");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Login
-                </Button>
-                <Button 
-                  className="w-full btn-gradient"
-                  onClick={() => {
-                    router.push("/signup");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Sign Up
-                </Button>
-              </>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3 px-3 py-2">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-gradient-primary text-white">
-                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-sm text-muted-foreground">{user.email}</div>
-                  </div>
-                </div>
-                <div className="border-t border-white/10 pt-2 space-y-1">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start btn-glass"
-                    onClick={() => {
-                      router.push("/profile");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start btn-glass"
-                    onClick={() => {
-                      router.push("/bookings");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    My Bookings
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start btn-glass"
-                    onClick={() => {
-                      router.push("/settings");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-destructive hover:text-destructive"
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
