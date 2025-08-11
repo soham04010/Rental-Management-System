@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,19 @@ import {
   TrendingUp,
   Users
 } from "lucide-react";
+import api from "@/lib/api"; 
+import io from "socket.io-client";
 
+const socket = io("http://localhost:5000");
+
+export default function AdminDashboard() {
+  interface Rental {
+    _id: string;
+    name: string;
+    description: string;
+    price: number | string;
+    images?: string[];
+  }
 
   interface Order {
     _id: string;
@@ -56,19 +67,16 @@ import {
       setRentals(prevRentals => prevRentals.filter(r => r._id !== deletedId));
     });
 
-
     // Listen for new orders
     socket.on("order_added", (newOrder: Order) => {
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     });
-
 
     // Cleanup listeners when the component unmounts
     return () => {
       socket.off("rental_added");
       socket.off("rental_deleted");
       socket.off("order_added");
-
     };
   }, []);
 
@@ -113,7 +121,6 @@ import {
         console.error("Failed to fetch orders:", error);
     }
   };
-
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -489,72 +496,6 @@ import {
           </Card>
         </TabsContent>
       </Tabs>
-
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
-      <div className="p-4 border rounded-md bg-gray-50 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              placeholder="Name"
-              className="p-2 border rounded"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-            />
-            <input
-              placeholder="Price"
-              className="p-2 border rounded"
-              value={form.price}
-              type="number"
-              onChange={e => setForm({ ...form, price: e.target.value })}
-            />
-            <textarea
-              placeholder="Description"
-              className="p-2 border rounded md:col-span-2"
-              rows={3}
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-            />
-            <input 
-              type="file" 
-              multiple 
-              onChange={handleFiles} 
-              className="md:col-span-2"
-            />
-        </div>
-        <button 
-          onClick={handleAdd} 
-          disabled={uploading} 
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          {uploading ? "Uploading..." : "Add Rental"}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {rentals.map(r => (
-          <div key={r._id} className="border rounded-lg overflow-hidden shadow-lg">
-            {r.images && r.images.length > 0 && (
-                <img
-                    src={r.images[0]}
-                    alt={r.name}
-                    className="w-full h-48 object-cover"
-                />
-            )}
-            <div className="p-4">
-              <h3 className="text-xl font-semibold">{r.name}</h3>
-              <p className="text-gray-700 font-bold">₹{r.price}</p>
-              <p className="text-gray-600 mt-2">{r.description}</p>
-              <button 
-                onClick={() => handleDelete(r._id)} 
-                className="mt-4 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
