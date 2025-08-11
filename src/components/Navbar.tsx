@@ -82,7 +82,7 @@ export default function Navbar() {
             </Link>
           )}
           {user?.role === "admin" && (
-            <Link href="/admin-dashboard" className="nav-link text-foreground font-medium">
+            <Link href="./dashboard/admin-dashboard" className="nav-link text-foreground font-medium">
               <Settings className="w-4 h-4 inline mr-2" />
               Admin Panel
             </Link>
