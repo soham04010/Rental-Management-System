@@ -194,17 +194,17 @@ export default function AdminDashboard() {
     <div className="min-h-screen p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold bg-admin-gradient bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold bg-admin-gradient bg-clip-text text-violet-50">
           Admin Dashboard
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-orange-300">
           Manage your rental business efficiently
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-admin-gradient-soft border border-primary/20 shadow-admin hover:shadow-admin-lg transition-all duration-300">
+        <Card className="bg-card border border-border shadow-md hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
             <Package className="h-4 w-4 text-primary" />
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
               <Button 
                 onClick={handleAdd} 
                 disabled={uploading || !form.name || !form.description || !form.price || files.length === 0}
-                className="w-full bg-admin-gradient hover:opacity-90 text-white shadow-admin transition-all duration-300"
+                className="w-full bg-admin-gradient hover:opacity-90 text-black shadow-admin transition-all duration-300"
                 size="lg"
               >
                 {uploading ? (
