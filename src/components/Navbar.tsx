@@ -76,7 +76,7 @@ export default function Navbar() {
             Bookings
           </Link>
           {user?.role === "customer" && (
-            <Link href="/customer-dashboard" className="nav-link text-foreground font-medium">
+            <Link href="/dashboard/customer-dashboard" className="nav-link text-foreground font-medium">
               <LayoutDashboard className="w-4 h-4 inline mr-2" />
               Dashboard
             </Link>
