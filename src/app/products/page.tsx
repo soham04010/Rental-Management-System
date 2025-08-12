@@ -1,14 +1,18 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import api from "@/lib/api";
 import io from "socket.io-client";
-import Link from "next/link";
 
-const socket = io("http://localhost:5000");
+const socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000");
 
 export default function ProductsPage() {
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookingProductId, setBookingProductId] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -42,6 +46,51 @@ export default function ProductsPage() {
     };
   }, []);
 
+  async function handleBookingSubmit(e) {
+    e.preventDefault();
+    if (!bookingProductId) return;
+
+    // Basic client validation of dates
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date cannot be after end date.");
+      return;
+    }
+
+    setBookingLoading(true);
+    try {
+       const userId = "64e55c24a4f0f2458e88f421"; // TODO: Replace with actual logged-in user ID
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: bookingProductId,
+          userId,
+          startDate,
+          endDate,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Booking failed");
+
+      alert("Booking successful!");
+
+      // Reset booking form state
+      setBookingProductId(null);
+      setStartDate("");
+      setEndDate("");
+    } catch (err) {
+      alert("Booking failed: " + err.message);
+    } finally {
+      setBookingLoading(false);
+    }
+  }
+
   if (loading) return <div className="p-8">Loading rentals...</div>;
 
   return (
@@ -59,12 +108,56 @@ export default function ProductsPage() {
             </div>
             <h2 className="text-xl font-semibold">{r.name}</h2>
             <p className="text-sm text-gray-600 line-clamp-2">{r.description}</p>
-            <div className="flex items-center justify-between mt-3">
-              <div className="font-bold">₹{r.price}/day</div>
-              <Link href={`/product/${r._id}`} className="px-3 py-1 bg-blue-600 text-white rounded">
-                View
-              </Link>
-            </div>
+            <div className="font-bold mt-3">₹{r.price}/day</div>
+
+            {bookingProductId === r._id ? (
+              <form onSubmit={handleBookingSubmit} className="mt-4 space-y-2">
+                <div>
+                  <label>
+                    Start Date:{" "}
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={e => setStartDate(e.target.value)}
+                      required
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    End Date:{" "}
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={e => setEndDate(e.target.value)}
+                      required
+                    />
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  disabled={bookingLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  {bookingLoading ? "Booking..." : "Confirm Booking"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBookingProductId(null)}
+                  className="ml-2 px-4 py-2 bg-gray-400 text-white rounded"
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setBookingProductId(r._id)}
+                disabled={bookingProductId !== null}
+                className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+              >
+                Rent Now
+              </button>
+            )}
           </div>
         ))}
       </div>

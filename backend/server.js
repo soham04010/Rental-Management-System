@@ -9,6 +9,7 @@ import rentalRoutes from "./routes/rentalRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js"; // new
 import authRoutes from "./routes/authRoutes.js"; // if you have - otherwise skip
 import uploadRoutes from "./routes/uploadRoutes.js"; // optional
+import productRoutes from "./routes/productRoutes.js";  
 import http from "http";
 
 dotenv.config();
@@ -38,6 +39,7 @@ const io = new Server(server, {
 app.use("/api/rentals", rentalRoutes(io));
 app.use("/api/bookings", bookingRoutes(io));
 app.use("/api/auth", authRoutes); // optional
+app.use("/api/products", productRoutes);
 
 io.on("connection", socket => {
   console.log("User connected", socket.id);
