@@ -1,47 +1,55 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import api from "@/lib/api";
-import io from "socket.io-client";
-const socket = io("http://localhost:5000");
 
-type Rental = {
-  _id: string;
-  name: string;
-  price: number;
-  description: string;
-  images?: (string | Blob | undefined)[];
-};
+export default function DashboardPage() {
+  // Simulate logged-in user ID - replace with real auth user id
+  const [userId] = React.useState("64e55c24a4f0f2458e88f421");
 
-export default function CustomerDashboard() {
-  const [rentals, setRentals] = useState<Rental[]>([]);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRentals();
-    socket.on("rental_added", (r: any) => setRentals(prev => [...prev, r]));
-    socket.on("rental_deleted", (id: any) => setRentals(prev => prev.filter(x => x._id !== id)));
-    return () => {
-      socket.off("rental_added");
-      socket.off("rental_deleted");
-    };
-  }, []);
+    async function fetchBookings() {
+      try {
+        const res = await fetch(`http://localhost:5000/api/bookings/user/${userId}`);
+        const data = await res.json();
+        setBookings(data);
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const fetchRentals = async () => {
-    const res = await api.get("/rentals");
-    setRentals(res.data);
-  };
+    fetchBookings();
+  }, [userId]);
+
+  if (loading) return <div className="p-8">Loading bookings...</div>;
 
   return (
-    <div className="p-6">
-      <h2>Customer Dashboard</h2>
-      {rentals.map(r => (
-        <div key={r._id} style={{border:"1px solid #eee", padding:10, marginBottom:10}}>
-          <h3>{r.name} — ₹{r.price}</h3>
-          <p>{r.description}</p>
-          <div style={{display:"flex", gap:8}}>
-            {r.images?.map((img: string | Blob | undefined,i: React.Key | null | undefined)=> <img key={i} src={img} alt="" style={{width:80, height:80, objectFit:"cover"}} />)}
-          </div>
-        </div>
-      ))}
+    <div className="max-w-4xl mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-6">Your Bookings</h1>
+
+      {bookings.length === 0 && <p>No bookings found.</p>}
+
+      <ul className="space-y-4">
+        {bookings.map((booking: any) => (
+          <li key={booking._id} className="border rounded p-4 shadow">
+            <p><strong>Booking ID:</strong> {booking._id}</p>
+            <p><strong>Rental Product ID:</strong> {booking.rental}</p>
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {new Date(booking.startDate).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>End Date:</strong>{" "}
+              {new Date(booking.endDate).toLocaleDateString()}
+            </p>
+            <p><strong>Status:</strong> {booking.status}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
