@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminNavbar from "../../components/AdminNavbar";
 import { 
   Plus, 
   Package, 
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
     // You can add additional navigation logic here
   };
 
-  const renderContent = () => {
+  const renderContent = (): React.ReactNode => {
     switch (currentSection) {
       case "dashboard":
         return renderDashboardContent();
@@ -145,7 +145,24 @@ export default function AdminDashboard() {
       case "orders":
         return renderOrdersContent();
       case "analytics":
-        return renderAnalyticsContent();
+        try {
+          return renderAnalyticsContent();
+        } catch {
+          return (
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics</CardTitle>
+                <CardDescription>Business insights and metrics coming soon.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <BarChart3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Analytics features coming soon.</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
       case "customers":
         return renderCustomersContent();
       default:
@@ -487,5 +504,22 @@ export default function AdminDashboard() {
         {renderContent()}
       </div>
     </div>
+  );
+}
+
+function renderAnalyticsContent(): React.ReactNode {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Analytics</CardTitle>
+        <CardDescription>Business insights and metrics coming soon.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="text-center py-8">
+          <BarChart3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">Analytics features coming soon.</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
