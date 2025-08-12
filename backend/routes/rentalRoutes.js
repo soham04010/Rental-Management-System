@@ -18,6 +18,20 @@ export default function(io) {
     }
   });
 
+  // GET single rental by ID  <-- NEW ROUTE
+  router.get("/:id", async (req, res) => {
+    try {
+      const rental = await Rental.findById(req.params.id);
+      if (!rental) {
+        return res.status(404).json({ error: "Rental not found." });
+      }
+      res.json(rental);
+    } catch (err) {
+      console.error("Error fetching rental by id:", err);
+      res.status(500).json({ error: "Failed to fetch rental." });
+    }
+  });
+
   // POST a new rental
   router.post("/", upload.array("images"), async (req, res) => {
     try {
@@ -39,9 +53,9 @@ export default function(io) {
         });
         urls.push(result.secure_url);
       }
-      
+
       console.log("✅ Images uploaded to Cloudinary.");
-      
+
       const rental = new Rental({
         name,
         description,
@@ -49,7 +63,7 @@ export default function(io) {
         images: urls,
         createdBy: '66b50e39544a422a57321033' // Temporary placeholder ID
       });
-      
+
       await rental.save();
       console.log("✅ Rental saved to database.");
 
@@ -69,9 +83,9 @@ export default function(io) {
       if (!rental) {
         return res.status(404).json({ error: "Rental not found." });
       }
-      
+
       await Rental.findByIdAndDelete(req.params.id);
-      
+
       io.emit("rental_deleted", req.params.id);
       res.json({ message: "Rental deleted successfully." });
     } catch (err) {
